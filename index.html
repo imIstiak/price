@@ -4,265 +4,671 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>RMB → BDT Pricing Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#f6fbff;
-      --panel:#e3f6f5;
-      --ink:#222;
-      --muted:#7a7a7a;
-      --accent:#38b6ff;
-      --accent-dark:#009688;
-      --line:#cce3ea;
-      --ok:#009688;
-      --warn:#ffd166;
-      --shadow:0 8px 32px rgba(56,182,255,0.08);
+    :root {
+      --primary: #7F56D9;
+      --primary-light: #F4EBFF;
+      --primary-dark: #6941C6;
+      --secondary: #101828;
+      --accent: #F670C7;
+      --accent-dark: #DD2590;
+      --success: #17B26A;
+      --warning: #F79009;
+      --background: #FFFFFF;
+      --surface: #F9FAFB;
+      --border: #EAECF0;
+      --text: #101828;
+      --text-secondary: #475467;
+      --shadow-sm: 0px 1px 2px rgba(16, 24, 40, 0.05);
+      --shadow: 0px 4px 6px -2px rgba(16, 24, 40, 0.03), 0px 12px 16px -4px rgba(16, 24, 40, 0.08);
+      --shadow-lg: 0px 8px 8px -4px rgba(16, 24, 40, 0.03), 0px 20px 24px -4px rgba(16, 24, 40, 0.08);
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji; background:var(--bg); color:var(--ink);}
 
-  .wrap{max-width:1100px;margin:32px auto;padding:32px;background:var(--panel);border-radius:32px;box-shadow:var(--shadow)}
-    .title{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-  .title h1{font-size:36px;margin:0;letter-spacing:.3px;color:var(--accent-dark);font-weight:800;}
-  .card{background:var(--panel); border:1.5px solid var(--line); border-radius:20px; padding:28px; box-shadow:var(--shadow)}
-  .grid{display:grid;grid-template-columns:repeat(12,1fr); gap:24px}
-    .g-6{grid-column:span 6}
-    .g-4{grid-column:span 4}
-    .g-12{grid-column:span 12}
-    @media (max-width:1000px){.g-6,.g-4{grid-column:span 12}}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  label{display:block;font-size:16px;color:var(--accent-dark);margin:0 0 10px 2px;font-weight:600;}
-  input[type="number"], input[type="text"]{width:100%;padding:16px 18px;border-radius:14px;border:1.5px solid var(--accent);background:#f7fafc;color:var(--ink);outline:none;font-size:18px;box-shadow:0 2px 12px rgba(67,234,124,0.05);}
-  input[type="number"]:focus{border-color:var(--accent-dark); box-shadow:0 0 0 4px rgba(67,234,124,.12)}
-  .row{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-  .hint{font-size:14px;color:var(--muted);font-style:italic;}
-  .pill{display:inline-flex;align-items:center;gap:12px;padding:12px 18px;border-radius:999px;background:#fff;border:1.5px solid var(--accent-dark);color:var(--accent-dark);font-size:16px;font-weight:600;box-shadow:0 2px 8px #43ea7c22;}
-  .btn{appearance:none;border:1.5px solid var(--accent-dark);background:var(--accent);color:#fff;padding:14px 22px;border-radius:14px;cursor:pointer;font-size:18px;font-weight:700;transition:box-shadow .2s;box-shadow:0 2px 8px #43ea7c22;}
-  .btn.primary{background:var(--accent-dark);color:#fff;border-color:var(--accent);box-shadow:0 2px 12px #43ea7c22;}
-  .btn:hover{filter:brightness(1.09);box-shadow:0 4px 16px #43ea7c44;}
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--background);
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
 
-  .stat{padding:20px;border-radius:16px;background:#f7fafc;border:1.5px solid var(--line);box-shadow:0 2px 12px #43ea7c11;}
-  .stat h3{margin:0 0 8px;font-size:18px;color:var(--muted);font-weight:700;}
-  .money{font-weight:900;font-size:28px;color:var(--ink);}
-  .win{color:#fff;background:var(--accent-dark);padding:12px 0;border-radius:10px;font-size:36px;box-shadow:0 2px 16px #43ea7c44;text-align:center;display:block;letter-spacing:1px;}
-  .warn{color:var(--warn);}
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-  table{width:100%;border-collapse:collapse;border-spacing:0;background:#fff;border-radius:12px;overflow:hidden;}
-  th,td{padding:16px 12px;border-bottom:1.5px solid var(--line);text-align:left;font-size:16px}
-  th{color:var(--accent-dark);font-weight:700;background:#f7fafc;}
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeIn 0.6s ease-out;
+    }
 
-  .footer{margin-top:24px;color:var(--muted);font-size:15px;font-weight:600;}
-  .k{color:var(--accent-dark);font-weight:700;}
-  .muted{color:var(--muted);font-weight:600;}
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      color: var(--secondary);
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .info-pill {
+      display: inline-flex;
+      align-items: center;
+      background: var(--primary-light);
+      padding: 12px 24px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .info-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .main-inputs {
+      animation: fadeIn 0.6s ease-out 0.2s both;
+    }
+
+    .secondary-inputs {
+      animation: fadeIn 0.6s ease-out 0.4s both;
+    }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .input-group:hover {
+      transform: translateY(-2px);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
+    .result-highlight {
+      margin: 32px 0;
+    }
+
+    .result-highlight .result-card {
+      transform: scale(1.05);
+    }
+
+    label {
+      display: block;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      background: var(--surface);
+      transition: all 0.2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    input:hover {
+      border-color: var(--primary-dark);
+      box-shadow: var(--shadow-sm);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+
+    input:disabled {
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: not-allowed;
+    }
+
+    .card {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      animation: fadeIn 0.6s ease-out 0.4s both;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .btn--primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .btn--primary:hover {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      box-shadow: var(--shadow), 0 0 0 3px var(--primary-light);
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
+      animation: fadeIn 0.6s ease-out 0.6s both;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .result-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+
+    .result-card--highlight {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      border: none;
+      box-shadow: var(--shadow);
+    }
+
+    .result-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: inherit;
+      opacity: 0.9;
+    }
+
+    .result-card .value {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .breakdown-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 24px;
+    }
+
+    .breakdown-table th,
+    .breakdown-table td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .breakdown-table th {
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+
+    .breakdown-table tr:hover td {
+      background: var(--surface);
+    }
+
+    .breakdown-table tr:last-child td {
+      border-bottom: none;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .footer {
+      margin-top: 64px;
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+      animation: fadeIn 0.6s ease-out 0.8s both;
+    }
+
+    .hint {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      transition: color 0.2s ease;
+    }
+
+    .input-group:hover .hint {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    @media (max-width: 1200px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .result-highlight .result-card {
+        transform: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 16px;
+      }
+      
+      .calculator {
+        grid-template-columns: 1fr;
+      }
+
+      .results {
+        grid-template-columns: 1fr;
+      }
+
+      .info-pill {
+        display: block;
+        text-align: center;
+        margin: 0 16px;
+      }
+
+      .card {
+        padding: 24px;
+        border-radius: 20px;
+      }
+
+      .result-card {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .section-title {
+        font-size: 16px;
+      }
+    }
+
+    @media (hover: none) {
+      .card:hover,
+      .result-card:hover,
+      .input-group:hover {
+        transform: none;
+      }
+    }
+  </style>
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="title">
+  <div class="container">
+    <header class="header">
       <h1>RMB → BDT Product Pricing Calculator</h1>
-      <div class="pill">Rate <strong>1 RMB = 18 BDT</strong> · Agent fee <strong>15%</strong> · Weight <strong>750 BDT/kg</strong> · Packing <strong>10 BDT</strong></div>
-    </div>
-
-    <div class="card" style="margin-top:16px">
-      <div class="grid">
-        <div class="g-4">
-          <label for="rmbPrice">China Product Price (RMB)</label>
-          <input id="rmbPrice" type="number" placeholder="" min="0" step="0.01" />
-        </div>
-        <div class="g-4">
-          <label for="courierRmb">Fixed Courier Cost in China (RMB) <span class="muted">(default 5)</span></label>
-          <input id="courierRmb" type="number" value="5" min="0" step="0.01" />
-        </div>
-
-        <div class="g-4">
-          <label for="profitMargin">Desired Profit Margin (%) <span class="muted">(default 30%)</span></label>
-          <input id="profitMargin" type="number" value="30" min="0" step="1" />
-        </div>
-
-        <div class="g-4">
-          <label for="weightKg">Product Weight (kg)</label>
-          <input id="weightKg" type="number" placeholder="" min="0" step="0.01" />
-        </div>
-
-        <div class="g-4">
-          <label for="salaryBdt">Moderator Salary (BDT / month)</label>
-          <input id="salaryBdt" type="number" value="5000" min="0" step="1" />
-        </div>
-        <div class="g-4">
-          <label for="monthlyUnits">Expected Sales (units / month) <span class="muted">(default 250)</span></label>
-          <input id="monthlyUnits" type="number" value="250" min="1" step="1" />
-        </div>
-
-        <div class="g-4">
-          <label for="adUsd">Ad Spend (USD / month) <span class="muted">(default 400)</span></label>
-          <input id="adUsd" type="number" value="400" min="0" step="1" />
-        </div>
-        <div class="g-4">
-          <label for="usdRate">USD Rate (BDT per $) <span class="muted">(fixed 125)</span></label>
-          <input id="usdRate" type="number" value="125" min="0" step="0.01" disabled />
-        </div>
-        <div class="g-4">
-          <label>Rounding</label>
-          <div class="row">
-            <button class="btn" id="roundNone">Exact</button>
-            <button class="btn primary" id="round100">Nearest 100</button>
-          </div>
-          <div class="hint">Keep <span class="k">Nearest 100</span> for clean pricing.</div>
-        </div>
+      <div class="info-pill">
+        1 RMB = 18 BDT · Agent fee 15% · Weight 750 BDT/kg · Packing 10 BDT
       </div>
-    </div>
+    </header>
 
-    <div class="grid" style="margin-top:16px">
-      <div class="g-6">
+    <div class="layout-grid">
+      <div class="main-inputs">
         <div class="card">
-          <div class="grid">
-            <div class="g-12 stat">
-              <h3>Recommended Selling Price</h3>
-              <div class="money win" id="sellingPrice">৳ 0</div>
-              <div class="hint">Landed × (1 + margin)</div>
+          <div class="calculator">
+            <div class="input-group">
+              <label for="rmbPrice">China Product Price (RMB)</label>
+              <input id="rmbPrice" type="number" min="0" step="0.01" />
             </div>
-            <div class="g-12 stat">
-              <h3>Landed Product Cost (BDT) — incl. fixed cost per unit</h3>
-              <div class="money" id="landedCost">৳ 0</div>
-              <div class="hint">(Buying + Courier + 15% agent fee) + Weight + Packing + Fixed cost per unit</div>
+
+            <div class="input-group">
+              <label for="weightKg">Product Weight (kg)</label>
+              <input id="weightKg" type="number" min="0" step="0.01" />
             </div>
-            <div class="g-6 stat">
-              <h3>Profit / Unit</h3>
-              <div class="money" id="profitPerUnit">৳ 0</div>
-              <div class="hint">Selling − Landed</div>
+
+            <div class="input-group">
+              <label for="courierRmb">China Courier Cost (RMB)</label>
+              <input id="courierRmb" type="number" value="5" min="0" step="0.01" />
+              <div class="hint">Default: 5 RMB</div>
             </div>
-            <div class="g-6 stat">
-              <h3>Fixed Cost Per Unit</h3>
-              <div class="money" id="fixedPerUnit">৳ 0</div>
-              <div class="hint">(Salary + Ads×Rate) / Expected units</div>
+
+            <div class="input-group">
+              <label for="profitMargin">Profit Margin (%)</label>
+              <input id="profitMargin" type="number" value="30" min="0" step="1" />
+              <div class="hint">Default: 30%</div>
             </div>
-             
+          </div>
+
+          <div class="input-group">
+            <label>Price Rounding</label>
+            <div class="btn-group">
+              <button class="btn" id="roundNone">Exact Price</button>
+              <button class="btn btn--primary" id="round100">Round to 100</button>
+            </div>
+            <div class="hint">Recommended: Round to nearest 100 for cleaner pricing</div>
+          </div>
+        </div>
+
+        <div class="result-highlight">
+          <div class="result-card result-card--highlight">
+            <h3>Recommended Selling Price</h3>
+            <div class="value" id="sellingPrice">৳0</div>
           </div>
         </div>
       </div>
 
-      <div class="g-6">
+      <div class="secondary-inputs">
         <div class="card">
-          <h3 style="margin:0 0 8px">Breakdown</h3>
-          <table>
-            <thead>
-              <tr><th>Component</th><th>Amount (BDT)</th></tr>
-            </thead>
-            <tbody id="breakdownRows">
-              <!-- dynamic rows -->
-            </tbody>
-          </table>
-          <div class="footer">Customer delivery charge is separate (not included).</div>
+          <h3 class="section-title">Business Settings</h3>
+          <div class="calculator">
+            <div class="input-group">
+              <label for="salaryBdt">Monthly Salary (BDT)</label>
+              <input id="salaryBdt" type="number" value="4500" min="0" step="1" />
+            </div>
+
+            <div class="input-group">
+              <label for="monthlyUnits">Expected Monthly Sales</label>
+              <input id="monthlyUnits" type="number" value="250" min="1" step="1" />
+              <div class="hint">Default: 250 units</div>
+            </div>
+
+            <div class="input-group">
+              <label for="adUsd">Monthly Ad Budget (USD)</label>
+              <input id="adUsd" type="number" value="400" min="0" step="1" />
+              <div class="hint">Default: $400</div>
+            </div>
+
+            <div class="input-group">
+              <label for="usdRate">USD to BDT Rate</label>
+              <input id="usdRate" type="number" value="125" disabled />
+              <div class="hint">Fixed rate: 125 BDT</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="results">
+          <div class="result-card">
+            <h3>Landing Cost</h3>
+            <div class="value" id="landedCost">৳0</div>
+          </div>
+
+          <div class="result-card">
+            <h3>Profit per Unit</h3>
+            <div class="value" id="profitPerUnit">৳0</div>
+          </div>
+
+          <div class="result-card">
+            <h3>Fixed Cost per Unit</h3>
+            <div class="value" id="fixedPerUnit">৳0</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="footer">Formula: <span class="muted">Variable landed = (RMB×18 + Courier×18) + 15% of (RMB×18 + Courier×18) + (Weight×750) + Packing. Fixed/unit = (Salary + AdUSD×USDRate) / MonthlyUnits. Total landed = Variable landed + Fixed/unit. Selling = Total landed × (1 + Margin%). Rounding: optional nearest 100.</span></div>
+    <div class="card">
+      <h3>Cost Breakdown</h3>
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Amount (BDT)</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownRows">
+          <!-- Dynamic rows will be inserted here -->
+        </tbody>
+      </table>
+      <div class="hint">* Delivery charges not included</div>
+    </div>
+
+    <footer class="footer">
+      <strong>Formula:</strong> Variable landed = (RMB×18 + Courier×18) + 15% of (RMB×18 + Courier×18) + (Weight×750) + Packing. 
+      Fixed/unit = (Salary + AdUSD×USDRate) / MonthlyUnits. 
+      Total landed = Variable landed + Fixed/unit. 
+      Selling = Total landed × (1 + Margin%).
+    </footer>
   </div>
 
   <script>
-    // Fixed parameters
-    const RMB_TO_BDT = 18;        // 1 RMB = 18 BDT (fixed)
-    const AGENT_COMMISSION = 0.15; // 15% on (buying + courier)
-    const WEIGHT_PER_KG = 750;     // 750 BDT per kg
-    const PACKING_BDT = 10;        // fixed packing
+    // Constants
+    const CONSTANTS = {
+      RMB_TO_BDT: 18,
+      AGENT_COMMISSION: 0.15,
+      WEIGHT_PER_KG: 750,
+      PACKING_BDT: 10,
+      USD_TO_BDT: 125
+    };
 
-    // Elements
-    const rmbPrice = document.getElementById('rmbPrice');
-    const weightKg = document.getElementById('weightKg');
-    const courierRmb = document.getElementById('courierRmb');
-    const profitMargin = document.getElementById('profitMargin');
-    const salaryBdt = document.getElementById('salaryBdt');
-    const monthlyUnits = document.getElementById('monthlyUnits');
-    const adUsd = document.getElementById('adUsd');
-    const usdRate = document.getElementById('usdRate');
+    // Initialize elements
+    const elements = {
+      inputs: {
+        rmbPrice: document.getElementById('rmbPrice'),
+        weightKg: document.getElementById('weightKg'),
+        courierRmb: document.getElementById('courierRmb'),
+        profitMargin: document.getElementById('profitMargin'),
+        salaryBdt: document.getElementById('salaryBdt'),
+        monthlyUnits: document.getElementById('monthlyUnits'),
+        adUsd: document.getElementById('adUsd'),
+        usdRate: document.getElementById('usdRate')
+      },
+      buttons: {
+        roundNone: document.getElementById('roundNone'),
+        round100: document.getElementById('round100')
+      },
+      outputs: {
+        landedCost: document.getElementById('landedCost'),
+        sellingPrice: document.getElementById('sellingPrice'),
+        profitPerUnit: document.getElementById('profitPerUnit'),
+        fixedPerUnit: document.getElementById('fixedPerUnit'),
+        breakdownRows: document.getElementById('breakdownRows')
+      }
+    };
 
-    const roundNone = document.getElementById('roundNone');
-    const round100 = document.getElementById('round100');
+    // State management
+    const state = {
+      roundingMode: 100,
+      updateRoundingMode(mode) {
+        this.roundingMode = mode;
+        elements.buttons.roundNone.classList.toggle('btn--primary', mode === 0);
+        elements.buttons.round100.classList.toggle('btn--primary', mode === 100);
+        calculatePrices();
+      }
+    };
 
-    const landedCostEl = document.getElementById('landedCost');
-  const sellingPriceEl = document.getElementById('sellingPrice');
-  const sellingPriceBottomEl = document.getElementById('sellingPriceBottom');
-    const profitPerUnitEl = document.getElementById('profitPerUnit');
-    const fixedPerUnitEl = document.getElementById('fixedPerUnit');
-    const breakdownRows = document.getElementById('breakdownRows');
+    // Formatting utilities
+    const formatters = {
+      currency: new Intl.NumberFormat('bn-BD', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }),
+      formatBDT(amount) {
+        return `৳${this.currency.format(amount)}`;
+      }
+    };
 
-    let roundingMode = 100; // default to nearest 100 as per preference
-
-    const fmtBDT = (n) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n);
-
-    function ceilToNearest(n, base){
-      return Math.ceil(n / base) * base;
+    // Helper functions
+    function getNumericValue(element, defaultValue = 0) {
+      const value = parseFloat(element.value);
+      return isNaN(value) ? defaultValue : value;
     }
 
-    function calc(){
-      const rmb = parseFloat(rmbPrice.value) || 0;
-      const kg  = parseFloat(weightKg.value) || 0;
-      const courier = parseFloat(courierRmb.value) || 0;
-      const marginPct = (parseFloat(profitMargin.value) || 0) / 100;
+    function ceilToNearest(number, base) {
+      return base ? Math.ceil(number / base) * base : number;
+    }
 
-      const salary = parseFloat(salaryBdt.value) || 0;
-      const units  = Math.max(1, parseFloat(monthlyUnits.value) || 1); // avoid /0
-      const adUSD  = parseFloat(adUsd.value) || 0;
-      const usdRt  = parseFloat(usdRate.value) || 125;
+    // Core calculation logic
+    function calculatePrices() {
+      // Get input values
+      const values = {
+        rmb: getNumericValue(elements.inputs.rmbPrice),
+        weight: getNumericValue(elements.inputs.weightKg),
+        courier: getNumericValue(elements.inputs.courierRmb),
+        margin: getNumericValue(elements.inputs.profitMargin) / 100,
+        salary: getNumericValue(elements.inputs.salaryBdt),
+        units: Math.max(1, getNumericValue(elements.inputs.monthlyUnits, 1)),
+        adSpend: getNumericValue(elements.inputs.adUsd)
+      };
 
-      // Conversions & components (variable)
-      const buyingBDT = rmb * RMB_TO_BDT;
-      const courierBDT = courier * RMB_TO_BDT;
-      const agentFee = (buyingBDT + courierBDT) * AGENT_COMMISSION; // per spec
-      const weightCost = kg * WEIGHT_PER_KG;
-      const packing = PACKING_BDT;
+      // Calculate costs
+      const costs = {
+        buying: values.rmb * CONSTANTS.RMB_TO_BDT,
+        courier: values.courier * CONSTANTS.RMB_TO_BDT,
+        weight: values.weight * CONSTANTS.WEIGHT_PER_KG,
+        packing: CONSTANTS.PACKING_BDT
+      };
 
-      const variableLanded = buyingBDT + courierBDT + agentFee + weightCost + packing;
+      costs.agentFee = (costs.buying + costs.courier) * CONSTANTS.AGENT_COMMISSION;
+      costs.advertising = (values.adSpend * CONSTANTS.USD_TO_BDT) / values.units;
+      costs.salaryPerUnit = values.salary / values.units;
+      costs.fixedCosts = costs.salaryPerUnit + costs.advertising;
+      costs.variableCosts = costs.buying + costs.courier + costs.agentFee + costs.weight + costs.packing;
+      costs.total = costs.variableCosts + costs.fixedCosts;
 
-      // Fixed cost per unit
-      const adBDT = adUSD * usdRt;
-      const fixedPerUnit = (salary + adBDT) / units;
+      // Calculate final prices
+      const selling = ceilToNearest(costs.total * (1 + values.margin), state.roundingMode);
+      const profit = Math.max(0, selling - costs.total);
 
-      // Total landed (incl. fixed)
-      const landed = variableLanded + fixedPerUnit;
+      // Update UI
+      updateDisplay(costs, selling, profit);
+      updateBreakdown(costs, selling);
+    }
 
-      // Selling
-      let selling = landed * (1 + marginPct);
-      if(roundingMode){ selling = ceilToNearest(selling, roundingMode); }
+    // UI update functions
+    function updateDisplay(costs, selling, profit) {
+      elements.outputs.landedCost.textContent = formatters.formatBDT(costs.total);
+      elements.outputs.sellingPrice.textContent = formatters.formatBDT(selling);
+      elements.outputs.profitPerUnit.textContent = formatters.formatBDT(profit);
+      elements.outputs.fixedPerUnit.textContent = formatters.formatBDT(costs.fixedCosts);
+    }
 
-      const profit = Math.max(0, selling - landed);
-
-      // Render headline stats
-      landedCostEl.textContent = `৳ ${fmtBDT(landed)}`;
-  sellingPriceEl.textContent = `৳ ${fmtBDT(selling)}`;
-  if(sellingPriceBottomEl) sellingPriceBottomEl.textContent = `৳ ${fmtBDT(selling)}`;
-      profitPerUnitEl.textContent = `৳ ${fmtBDT(profit)}`;
-      fixedPerUnitEl.textContent = `৳ ${fmtBDT(fixedPerUnit)}`;
-
-      // Breakdown table
-      breakdownRows.innerHTML = '';
+    function updateBreakdown(costs, selling) {
       const rows = [
-        { name: `Buying (RMB × ${RMB_TO_BDT})`, val: buyingBDT },
-        { name: `Courier in China (RMB × ${RMB_TO_BDT})`, val: courierBDT },
-        { name: `Agent commission (15% on buying+courier)`, val: agentFee },
-        { name: `Weight cost (kg × ${WEIGHT_PER_KG})`, val: weightCost },
-        { name: `Packing`, val: packing },
-        { name: `Fixed cost per unit`, val: fixedPerUnit },
+        { name: 'Product Cost', value: costs.buying },
+        { name: 'Courier Cost', value: costs.courier },
+        { name: 'Agent Commission (15%)', value: costs.agentFee },
+        { name: 'Weight Charges', value: costs.weight },
+        { name: 'Packing Cost', value: costs.packing },
+        { name: 'Fixed Costs per Unit', value: costs.fixedCosts }
       ];
-      rows.forEach(r=>{
-        const tr = document.createElement('tr');
-        const td1 = document.createElement('td'); td1.textContent = r.name; tr.appendChild(td1);
-        const td2 = document.createElement('td'); td2.textContent = `৳ ${fmtBDT(r.val)}`; tr.appendChild(td2);
-        breakdownRows.appendChild(tr);
-      });
-      const trL = document.createElement('tr'); trL.innerHTML = `<td><strong>Total Landed Cost</strong></td><td><strong>৳ ${fmtBDT(landed)}</strong></td>`; breakdownRows.appendChild(trL);
-      const trS = document.createElement('tr'); trS.innerHTML = `<td><strong>Selling Price</strong></td><td><strong>৳ ${fmtBDT(selling)}</strong></td>`; breakdownRows.appendChild(trS);
+
+      elements.outputs.breakdownRows.innerHTML = rows
+        .map(row => `
+          <tr>
+            <td>${row.name}</td>
+            <td>${formatters.formatBDT(row.value)}</td>
+          </tr>
+        `)
+        .join('') + `
+          <tr>
+            <td><strong>Total Landing Cost</strong></td>
+            <td><strong>${formatters.formatBDT(costs.total)}</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Final Selling Price</strong></td>
+            <td><strong>${formatters.formatBDT(selling)}</strong></td>
+          </tr>
+        `;
     }
 
     // Event listeners
-    [rmbPrice, weightKg, courierRmb, profitMargin, salaryBdt, monthlyUnits, adUsd].forEach(el=> el.addEventListener('input', calc));
+    Object.values(elements.inputs).forEach(input => {
+      if (!input.disabled) {
+        input.addEventListener('input', calculatePrices);
+      }
+    });
 
-    document.getElementById('roundNone').addEventListener('click', e=>{ e.preventDefault(); roundingMode = 0; roundNone.classList.add('primary'); round100.classList.remove('primary'); calc();});
-    document.getElementById('round100').addEventListener('click', e=>{ e.preventDefault(); roundingMode = 100; round100.classList.add('primary'); roundNone.classList.remove('primary'); calc();});
+    elements.buttons.roundNone.addEventListener('click', () => state.updateRoundingMode(0));
+    elements.buttons.round100.addEventListener('click', () => state.updateRoundingMode(100));
 
-    // Initial render
-    calc();
+    // Initialize
+    calculatePrices();
   </script>
 </body>
 </html> 
